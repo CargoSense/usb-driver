@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git://github.com/CargoSense/usb-drive.git"
   },
+  "dependencies" : { 
+    "bluebird" : "latest"
+  },
   "keywords": [
     "usb"
   ],
