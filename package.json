@@ -1,0 +1,21 @@
+{
+  "name": "usb-drive",
+  "version": "0.0.1",
+  "description": "USB Disk Drive Events and Handling",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/CargoSense/usb-drive.git"
+  },
+  "keywords": [
+    "usb"
+  ],
+  "author": "Rich Kilmer <rich.kilmer@gmail.com> (http://www.cargosense.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CargoSense/usb-drive/issues"
+  }
+}
