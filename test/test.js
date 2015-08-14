@@ -1,9 +1,9 @@
 var USBDrive = require('../src/main.js');
 
 USBDrive.unmount("/Volumes/Untitled")
-  .then(function(result) {
+  .then(function() {
     console.log("Unmounted");
   })
-  .catch(function(error) {
+  .catch(function() {
     console.log("Not Unmounted");
   });
