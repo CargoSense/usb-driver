@@ -14,13 +14,13 @@
       'target_name': 'usb_driver',
       'include_dirs': [ '<!(node -e "require(\'nan\')")' ],
       'sources': [
-        'src/usb_driver.cc',
+        'src/usb_driver_module.cc',
         'src/usb_device_info.cc'
       ],
       'conditions': [
         ['OS=="mac"', {
           'sources': [
-            'src/mac/usb_driver_mac.mm',
+            'src/mac/usb_driver.mm',
           ],
           'link_settings': {
             'libraries': [
@@ -30,12 +30,12 @@
         }],
         ['OS=="win"', {
           'sources': [
-            'src/win/usb_driver_win.cc',
+            'src/win/usb_driver.cc',
           ],
         }],
         ['OS=="linux"', {
           'sources': [
-            'src/linux/usb_driver_linux.cc',
+            'src/linux/usb_driver.cc',
           ],
         }],
       ],
