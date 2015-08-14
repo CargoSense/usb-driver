@@ -1,13 +1,15 @@
 var USBDrive = require('../src/main.js');
 
 USBDrive.getAll()
-  .then(function() {
-    console.log("GetAll");
+  .then(function(usbDrives) {
+    console.log("GetAll:");
+    console.log(usbDrives)
   });
 
 USBDrive.get("1234")
-  .then(function() {
+  .then(function(usbDrive) {
     console.log("Get");
+    console.log(usbDrive)
   });
 
 USBDrive.unmount("/Volumes/Untitled")
