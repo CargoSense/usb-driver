@@ -2,6 +2,19 @@ var Promise = require('bluebird');
 var DiskWatcher = require('./diskwatcher')();
 var USBDriver = require('../build/Release/usb_driver.node')
 
+/*
+Device Object
+{
+  id: '12:12:WHATEVER',
+  vendorCode: '0x0a',
+  productCode: '0x12',
+  manufacturer: 'Foo Bar Technologies',
+  product: 'Baz Sensing Quux',
+  serialNumber: 'IDQFB0023AB',
+  mount: '/Volumes/FOOBAR1'
+}
+*/
+
 module.exports = {
 
   on: function(event, callback) {
@@ -10,17 +23,13 @@ module.exports = {
   
   getAll: function() {
     return new Promise(function(resolve, reject) {
-      // Return devices list
-      resolve([]);
-      //reject(false);
+      resolve(USBDriver.getDevices());
     });
   },
   
   get: function(id) {
     return new Promise(function(resolve, reject) {
-      // Return device
-      resolve(null);
-      //reject(false);
+      resolve(USBDriver.getDevice(id));
     });
   },
   

@@ -196,7 +196,7 @@ void USBDeviceCallback( void* refCon, io_iterator_t iterator, bool inserted )
             DASessionRef daSession = DASessionCreate( kCFAllocatorDefault );
             DADiskRef disk = DADiskCreateFromBSDName( kCFAllocatorDefault,
                                                       aSession, bsdNameC );
-            if ( disk )
+            if ( disk != NULL )
             {
                // once you get here, the device is now mounted, but you
                // have to wait for any associated disk volumes to mount.

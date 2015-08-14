@@ -11,4 +11,12 @@ bool Unmount(const std::string& volume) {
   return false;
 }
 
+void GetDevice(const std::string& identifier) {
+  NSLog(@"USB DRIVER: GET DEVICE: %s", identifier.c_str());
+}
+
+void GetDevices() {
+  NSLog(@"USB DRIVER: GET DEVICES");
+}
+
 }  // namespace usb_driver

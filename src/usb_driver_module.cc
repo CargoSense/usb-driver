@@ -4,6 +4,7 @@
 using namespace v8;
 
 namespace {
+
   NAN_METHOD(Unmount) {
     NanScope();
 
@@ -15,8 +16,27 @@ namespace {
     }
   }
 
+  NAN_METHOD(GetDevice) {
+    NanScope();
+
+    String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
+    //usb_driver::GetDevice(*utf8_string));
+    
+    NanReturnNull();
+  }
+
+  NAN_METHOD(GetDevices) {
+    NanScope();
+
+    //usb_driver::GetDevices();
+    
+    NanReturnNull();
+  }
+
   void Init(Handle<Object> exports) {
     NODE_SET_METHOD(exports, "unmount", Unmount);
+    NODE_SET_METHOD(exports, "getDevice", GetDevice);
+    NODE_SET_METHOD(exports, "getDevices", GetDevices);
   }
 }  // namespace
 

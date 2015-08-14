@@ -14,4 +14,14 @@ bool Unmount(const std::string& volume) {
   }
 }
 
+void GetDevice(const std::string& identifier) {
+  std::cout << "Get Device: ";
+  std::cout << identifier << std::endl;
+}
+
+void GetDevices() {
+  std::cout << "Get Devices";
+  std::cout << std::endl;
+}
+
 }  // namespace usb_driver

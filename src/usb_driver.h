@@ -4,8 +4,12 @@
 #include <string>
 
 namespace usb_driver {
+  
+  void GetDevices();
+  
+  void GetDevice(const std::string& id);
 
-bool Unmount(const std::string& volume);
+  bool Unmount(const std::string& volume);
 
 }  // namespace usb_driver
 
