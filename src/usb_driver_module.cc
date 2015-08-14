@@ -27,10 +27,18 @@ namespace {
 
   NAN_METHOD(GetDevices) {
     NanScope();
-
-    //usb_driver::GetDevices();
     
-    NanReturnNull();
+    //usb_driver::GetDevices(); 
+    
+    int cnt = 0; //set cnt to the size of the array of devices
+    
+    Handle<Array> arr = NanNew<Array>(cnt);
+
+  	//for(int i = 0; i < cnt; i++) {
+  	//	arr->Set(i, devices[i]);
+  	//}
+    
+    NanReturnValue(arr);
   }
 
   void Init(Handle<Object> exports) {
