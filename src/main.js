@@ -1,6 +1,8 @@
 var Promise = require('bluebird');
 var DiskWatcher = require('./diskwatcher')();
 
+USBDriver = require('../build/Release/usb_driver.node')
+
 module.exports = {
 
   on: function(event, callback) {
@@ -23,8 +25,9 @@ module.exports = {
     });
   },
   
-  unmount: function(id) {
+  unmount: function(volume) {
     return new Promise(function(resolve, reject) {
+      USBDriver.unmount(volume);
       resolve(true);
       //reject(false);
     });

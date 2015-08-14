@@ -11,7 +11,8 @@
     "url": "git://github.com/CargoSense/usb-drive.git"
   },
   "dependencies" : { 
-    "bluebird" : "latest"
+    "bluebird" : "latest",
+    "nan": "https://atom.io/download/atom-shell/nan-1.6.1.tgz"
   },
   "keywords": [
     "usb"
