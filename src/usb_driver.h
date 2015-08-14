@@ -5,7 +5,7 @@
 
 namespace usb_driver {
 
-void Unmount(const std::string& volume);
+bool Unmount(const std::string& volume);
 
 }  // namespace usb_driver
 

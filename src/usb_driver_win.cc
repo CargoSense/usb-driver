@@ -4,9 +4,14 @@
 
 namespace usb_driver {
 
-void Unmount(const std::string& volume) {
+bool Unmount(const std::string& volume) {
   std::cout << "Unmount volume: ";
-  std::cout << volume << std::endl;
+  std::cout << volume  << std::endl;
+  if(DeleteVolumeMountPoint(volume.c_str())) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace usb_driver

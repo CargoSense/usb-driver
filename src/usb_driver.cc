@@ -8,9 +8,11 @@ namespace {
     NanScope();
 
     String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
-    usb_driver::Unmount(*utf8_string);
-
-    NanReturnUndefined();
+    if (usb_driver::Unmount(*utf8_string)) {
+      NanReturnValue(NanTrue());
+    } else {
+      NanReturnValue(NanFalse());
+    }
   }
 
   void Init(Handle<Object> exports) {
