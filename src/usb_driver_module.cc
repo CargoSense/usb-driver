@@ -13,11 +13,11 @@ namespace {
 	obj->Set(NanNew<v8::String>(name), NanNew<v8::String>(val))
 
 	OBJ_ATTR("id", usb_drive->location_id);
-	OBJ_ATTR("product_id", usb_drive->product_id);
-	OBJ_ATTR("vendor_id", usb_drive->vendor_id);
-	OBJ_ATTR("product_str", usb_drive->product_str);
-	OBJ_ATTR("serial_str", usb_drive->serial_str);
-	OBJ_ATTR("vendor_str", usb_drive->vendor_str);
+	OBJ_ATTR("productCode", usb_drive->product_id);
+	OBJ_ATTR("vendorCode", usb_drive->vendor_id);
+	OBJ_ATTR("product", usb_drive->product_str);
+	OBJ_ATTR("serialNumber", usb_drive->serial_str);
+	OBJ_ATTR("manufacturer", usb_drive->vendor_str);
 	OBJ_ATTR("device_address", usb_drive->device_address);
 	OBJ_ATTR("mount", usb_drive->mount);
 
