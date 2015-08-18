@@ -32,10 +32,8 @@ DiskWatcher.prototype.unmount = function(device) {
   this.emit('unmount', device);
 };
 
-function diskWatcher(USBDriver) {
-  var watcher = new DiskWatcher();
-  USBDriver.registerWatcher(watcher);
-  return watcher;
+function diskWatcher() {
+  return new DiskWatcher();
 }
 
 module.exports = diskWatcher
