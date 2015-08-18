@@ -46,6 +46,7 @@ module.exports = {
   },
   
   waitForEvents: function() {
+    console.log("WARNING: This method will not return.")
     USBDriver.waitForEvents();
   }
 };
