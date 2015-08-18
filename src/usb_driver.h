@@ -2,15 +2,23 @@
 #define SRC_USB_DRIVER_H_
 
 #include <string>
+#include <vector>
 
 namespace usb_driver {
-  
-  void GetDevices();
-  
-  void GetDevice(const std::string& id);
+    struct USBDrive {
+	std::string location_id;
+	std::string product_id;
+	std::string vendor_id;
+	std::string product_str;
+	std::string serial_str;
+	std::string vendor_str;
+	std::string device_address;
+	std::string mount;
+    };
 
-  bool Unmount(const std::string& volume);
-
-}  // namespace usb_driver
+    std::vector<struct USBDrive *> GetDevices();
+    struct USBDrive *GetDevice(const std::string &id);
+    bool Unmount(const std::string &volume);
+}
 
 #endif  // SRC_USB_DRIVER_H_

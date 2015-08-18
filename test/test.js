@@ -8,18 +8,19 @@ USBDrive.getAll()
       USBDrive.get(usbDrives[i].id)
         .then(function(usbDrive) {
           if (usbDrive) {
-            console.log("Get: "+usbDrives[i].id);
+            console.log("Get: "+usbDrive.id);
             console.log(usbDrive)
-            USBDrive.unmount(usbDrive.mount)
-              .then(function() {
-                console.log("Unmounted");
-              })
-              .catch(function() {
-                console.log("Not Unmounted");
-              });
-
+            if (usbDrive.mount) {
+              USBDrive.unmount(usbDrive.mount)
+                .then(function() {
+                  console.log("Unmounted");
+                })
+                .catch(function() {
+                  console.log("Not Unmounted");
+                });
+            }
           } else {
-            console.log("Could not get "+usbDrives[i].id)
+            console.log("Could not get "+usbDrives[i])
           }
         });
     }

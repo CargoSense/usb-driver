@@ -14,20 +14,21 @@
       'target_name': 'usb_driver',
       'include_dirs': [ '<!(node -e "require(\'nan\')")' ],
       'sources': [
-        'src/usb_driver_module.cc',
-        'src/usb_device_info.cc'
+        'src/usb_driver_module.cc'
       ],
       'conditions': [
         ['OS=="mac"', {
           'sources': [
             'src/mac/usb_driver.mm',
           ],
-          'link_settings': {
-            'libraries': [
-              '$(SDKROOT)/System/Library/Frameworks/AppKit.framework',
-              '$(SDKROOT)/System/Library/Frameworks/IOKit.framework'
+          'xcode_settings': {
+            'MACOSX_DEPLOYMENT_TARGET': '10.9',
+            'OTHER_LDFLAGS': [
+              '-framework Foundation',
+              '-framework IOKit',
+              '-framework DiskArbitration'
             ],
-          }
+          },
         }],
         ['OS=="win"', {
           'sources': [
