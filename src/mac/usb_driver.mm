@@ -95,10 +95,10 @@ usb_service_object(io_service_t usb_service)
 			usb_info->mount = path_str.substr(off + 3);
 		    }
 		}
+		CFRelease(desc);
 	    }
-	    CFRelease(desc);
+	    CFRelease(disk);
 	}
-	CFRelease(disk);
 	CFRelease(da_session);
     }
 
