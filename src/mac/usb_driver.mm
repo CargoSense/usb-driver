@@ -89,10 +89,11 @@ usb_service_object(io_service_t usb_service)
                         kDADiskDescriptionVolumePathKey);
 		if (path != nil) {
 		    std::string path_str = [[path description] UTF8String];
-		    size_t off = path_str.find("://");
+		    // Since we get an URI, we need to determine the UNIX
+		    // path from it.
+		    size_t off = path_str.find("/Volumes");
 		    if (off != std::string::npos) {
-			// Skip URL scheme (ex. file://...).
-			usb_info->mount = path_str.substr(off + 3);
+			usb_info->mount = path_str.substr(off);
 		    }
 		}
 		CFRelease(desc);
