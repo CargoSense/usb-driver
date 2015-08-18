@@ -18,7 +18,7 @@ namespace {
 	OBJ_ATTR("product", usb_drive->product_str);
 	OBJ_ATTR("serialNumber", usb_drive->serial_str);
 	OBJ_ATTR("manufacturer", usb_drive->vendor_str);
-	OBJ_ATTR("device_address", usb_drive->device_address);
+	OBJ_ATTR("deviceAddress", usb_drive->device_address);
 	OBJ_ATTR("mount", usb_drive->mount);
 
 #undef OBJ_ATTR
@@ -38,6 +38,15 @@ namespace {
 	    NanReturnValue(NanFalse());
 	}
     }
+
+  NAN_METHOD(RegisterWatcher)
+  {
+    NanScope();
+  // lrz something like this?  my c++ skills SUCK ASS!
+  // Local<Object> watcher(Local<Object>::Cast(args[0]));
+  //   usb_driver::RegisterWatcher(*watcher);
+    NanReturnNull();
+  }
 
     NAN_METHOD(GetDevice)
     {
@@ -73,6 +82,7 @@ namespace {
 	NODE_SET_METHOD(exports, "unmount", Unmount);
 	NODE_SET_METHOD(exports, "getDevice", GetDevice);
 	NODE_SET_METHOD(exports, "getDevices", GetDevices);
+	NODE_SET_METHOD(exports, "registerWatcher", RegisterWatcher);
     }
 }  // namespace
 

@@ -1,6 +1,6 @@
 var Promise = require('bluebird');
-var DiskWatcher = require('./diskwatcher')();
 var USBDriver = require('../build/Release/usb_driver.node')
+var DiskWatcher = require('./diskwatcher')(USBDriver);
 
 /*
 Device Object
@@ -42,4 +42,5 @@ module.exports = {
       }
     });
   }
+  
 };
