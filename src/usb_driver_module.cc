@@ -48,6 +48,13 @@ namespace {
     NanReturnNull();
   }
 
+  NAN_METHOD(WaitForEvents)
+  {
+    NanScope();
+  // lrz create loop here.  Win32 needs the same thing and likely linux
+    NanReturnNull();
+  }
+
     NAN_METHOD(GetDevice)
     {
 	NanScope();
@@ -83,6 +90,7 @@ namespace {
 	NODE_SET_METHOD(exports, "getDevice", GetDevice);
 	NODE_SET_METHOD(exports, "getDevices", GetDevices);
 	NODE_SET_METHOD(exports, "registerWatcher", RegisterWatcher);
+  NODE_SET_METHOD(exports, "waitForEvents", WaitForEvents);
     }
 }  // namespace
 

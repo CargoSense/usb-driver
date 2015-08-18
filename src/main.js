@@ -41,6 +41,9 @@ module.exports = {
         reject(false);
       }
     });
-  }
+  },
   
+  waitForEvents: function() {
+    USBDriver.waitForEvents();
+  }
 };
