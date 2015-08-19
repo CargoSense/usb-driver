@@ -18,9 +18,11 @@ Unmount(const std::string &volume)
 {
     if (volume.size() > 0) {
 	DASessionRef da_session = DASessionCreate(kCFAllocatorDefault);
+	assert(da_session != NULL);
 	CFURLRef volume_path = CFURLCreateFromFileSystemRepresentation(
 		kCFAllocatorDefault, (const UInt8 *)volume.c_str(),
 		volume.size(), true);
+	assert(volume_path != NULL);
 	DADiskRef disk = DADiskCreateFromVolumePath(kCFAllocatorDefault,
 		da_session, volume_path);
 	if (disk != NULL) {
@@ -90,6 +92,7 @@ usb_service_object(io_service_t usb_service)
 	usb_device.append("s1");
 
 	DASessionRef da_session = DASessionCreate(kCFAllocatorDefault);
+	assert(da_session != NULL);
 	DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault,
 		da_session, usb_device.c_str());
 	if (disk != NULL) {
