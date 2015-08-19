@@ -1,17 +1,17 @@
-var USBDrive = require('../src/usbDrive.js')();
+var USBDriver = require('../src/usb-driver.js')();
 
-USBDrive.getAll()
+USBDriver.getAll()
   .then(function(usbDrives) {
     console.log("GetAll: "+usbDrives.length);
     console.log(usbDrives)
     for(var i = 0;i<usbDrives.length;i++) {
-      USBDrive.get(usbDrives[i].id)
+      USBDriver.get(usbDrives[i].id)
         .then(function(usbDrive) {
           if (usbDrive) {
             console.log("Get: "+usbDrive.id);
             console.log(usbDrive)
             if (usbDrive.mount) {
-              USBDrive.unmount(usbDrive.mount)
+              USBDriver.unmount(usbDrive.mount)
                 .then(function() {
                   console.log("Unmounted");
                 })
