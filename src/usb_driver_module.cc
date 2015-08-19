@@ -5,7 +5,7 @@ using namespace v8;
 
 namespace {
     static Local<Object>
-    USBDrive_to_Object(struct usb_driver::USBDrive * usb_drive)
+    USBDrive_to_Object(struct usb_driver::USBDrive *usb_drive)
     {
 	Local<Object> obj = NanNew<Object>();
 
@@ -22,7 +22,6 @@ namespace {
 	OBJ_ATTR("mount", usb_drive->mount);
 
 #undef OBJ_ATTR
-
 	return obj;
     }
 
@@ -39,21 +38,66 @@ namespace {
 	}
     }
 
-  NAN_METHOD(RegisterWatcher)
-  {
-    NanScope();
-  // lrz something like this?  my c++ skills SUCK ASS!
-  // Local<Object> watcher(Local<Object>::Cast(args[0]));
-  //   usb_driver::RegisterWatcher(*watcher);
-    NanReturnNull();
-  }
+    class NodeUSBWatcher : public usb_driver::USBWatcher {
+	Persistent<Object> js_watcher;
 
-  NAN_METHOD(WaitForEvents)
-  {
-    NanScope();
-  // lrz create loop here.  Win32 needs the same thing and likely linux
-    NanReturnNull();
-  }
+	public:
+	NodeUSBWatcher(Local<Object> obj) {
+	    NanAssignPersistent(js_watcher, obj);
+	}
+
+	virtual void
+	attached(struct usb_driver::USBDrive *usb_info) {
+	    emit("attach", usb_info);
+	}
+
+	virtual void
+	detached(struct usb_driver::USBDrive *usb_info) {
+	    emit("detach", usb_info);
+	}
+
+	virtual void
+	mount(struct usb_driver::USBDrive *usb_info) {
+	    emit("mount", usb_info);
+	}
+
+	virtual void
+	unmount(struct usb_driver::USBDrive *usb_info) {
+	    emit("unmount", usb_info);
+	}
+
+	private:
+	void
+	emit(const char *msg, struct usb_driver::USBDrive *usb_info) {
+	    Local<Object> rcv = NanNew<Object>(js_watcher);
+
+	    Handle<Value> argv[1];
+	    if (usb_info != NULL) {
+		argv[0] = USBDrive_to_Object(usb_info);
+	    }
+	    else {
+		argv[0] = NanNull();
+	    };
+
+	    NanMakeCallback(rcv, NanNew<v8::String>(msg), 1, argv);
+	}
+    };
+
+    NAN_METHOD(RegisterWatcher)
+    {
+	NanScope();
+	Local<Object> js_watcher(Local<Object>::Cast(args[0]));
+	NodeUSBWatcher *watcher = new NodeUSBWatcher(js_watcher);
+	usb_driver::RegisterWatcher(watcher);
+	NanReturnNull();
+    }
+
+    NAN_METHOD(WaitForEvents)
+    {
+	NanScope();
+	usb_driver::WaitForEvents();
+	NanReturnNull();
+    }
 
     NAN_METHOD(GetDevice)
     {
@@ -90,7 +134,7 @@ namespace {
 	NODE_SET_METHOD(exports, "getDevice", GetDevice);
 	NODE_SET_METHOD(exports, "getDevices", GetDevices);
 	NODE_SET_METHOD(exports, "registerWatcher", RegisterWatcher);
-  NODE_SET_METHOD(exports, "waitForEvents", WaitForEvents);
+	NODE_SET_METHOD(exports, "waitForEvents", WaitForEvents);
     }
 }  // namespace
 
