@@ -5,9 +5,7 @@
 #import <IOKit/IOKitLib.h>
 #import <IOKit/IOCFPlugIn.h>
 #import <IOKit/usb/IOUSBLib.h>
-
-#include <sys/param.h>
-#include <sys/mount.h>
+#import <DiskArbitration/DiskArbitration.h>
 
 #include <map>
 
@@ -18,11 +16,23 @@ static std::map<std::string, struct USBDrive *> all_devices;
 bool
 Unmount(const std::string &volume)
 {
-    if (unmount(volume.c_str(), 0) != 0) {
-	NSLog(@"umount() failed: %s", strerror(errno));
-	return false;
+    if (volume.size() > 0) {
+	DASessionRef da_session = DASessionCreate(kCFAllocatorDefault);
+	CFURLRef volume_path = CFURLCreateFromFileSystemRepresentation(
+		kCFAllocatorDefault, (const UInt8 *)volume.c_str(),
+		volume.size(), true);
+	DADiskRef disk = DADiskCreateFromVolumePath(kCFAllocatorDefault,
+		da_session, volume_path);
+	if (disk != NULL) {
+	    // TODO: pass error callback and escalate error to JS.
+	    DADiskUnmount(disk, kDADiskUnmountOptionDefault, NULL, NULL);
+	    CFRelease(disk);
+	    return true;
+	}
+	CFRelease(volume_path);
+	CFRelease(da_session);
     }
-    return true;
+    return false;
 }
 
 struct USBDrive *
