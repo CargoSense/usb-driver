@@ -46,6 +46,10 @@ namespace {
 	    NanAssignPersistent(js_watcher, obj);
 	}
 
+	~NodeUSBWatcher() {
+	    NanDisposePersistent(js_watcher);
+	}
+
 	virtual void
 	attached(struct usb_driver::USBDrive *usb_info) {
 	    emit("attach", usb_info);
