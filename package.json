@@ -1,7 +1,7 @@
 {
   "name": "usb-driver",
   "version": "0.0.1",
-  "description": "USB Disk Drive Events and Handling",
+  "description": "Driver for USB/Disck Events and Handling",
   "main": "./src/usb-driver.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

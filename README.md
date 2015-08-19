@@ -1,7 +1,7 @@
-# usb-drive
-USB Drive Service
+# usb-driver
+USB Driver Service
 
-# Building USB Drive in Development
+# Building USB Driver in Development
 
 npm install --build-from-source
 
