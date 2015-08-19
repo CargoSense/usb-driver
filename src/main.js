@@ -1,7 +1,6 @@
 var Promise = require('bluebird');
 var DiskWatcher = require('./diskwatcher')();
 var USBDriver = require('../build/Release/usb_driver.node')
-
 USBDriver.registerWatcher(DiskWatcher);
 
 /*
@@ -17,36 +16,45 @@ Device Object
 }
 */
 
-module.exports = {
+var usbDrive;
 
-  on: function(event, callback) {
-    DiskWatcher.on(event, callback);
-  },
-  
-  getAll: function() {
-    return new Promise(function(resolve, reject) {
-      resolve(USBDriver.getDevices());
-    });
-  },
-  
-  get: function(id) {
-    return new Promise(function(resolve, reject) {
-      resolve(USBDriver.getDevice(id));
-    });
-  },
-  
-  unmount: function(volume) {
-    return new Promise(function(resolve, reject) {
-      if( USBDriver.unmount(volume) ) {
-        resolve(true);
-      } else {
-        reject(false);
-      }
-    });
-  },
-  
-  waitForEvents: function() {
-    console.log("WARNING: This method will not return.")
-    USBDriver.waitForEvents();
-  }
+var USBDrive = function() {
 };
+
+USBDrive.prototype.on = function(event, callback) {
+  DiskWatcher.on(event, callback);
+};
+
+USBDrive.prototype.getAll = function() {
+  return new Promise(function(resolve, reject) {
+    resolve(USBDriver.getDevices());
+  });
+};
+
+USBDrive.prototype.get = function(id) {
+  return new Promise(function(resolve, reject) {
+    resolve(USBDriver.getDevice(id));
+  });
+};
+
+USBDrive.prototype.unmount = function(volume) {
+  return new Promise(function(resolve, reject) {
+    if( USBDriver.unmount(volume) ) {
+      resolve(true);
+    } else {
+      reject(false);
+    }
+  });
+};
+
+USBDrive.prototype.waitForEvents = function() {
+  console.log("WARNING: This method will not return.")
+  USBDriver.waitForEvents();
+};
+
+module.exports = function() {
+  if (!driver) {
+    usbDrive = new USBDrive();
+  }
+  return usbDrive;
+}
