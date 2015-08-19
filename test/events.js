@@ -6,7 +6,7 @@ USBDriver.on("attach", function(device) {
 });
 
 USBDriver.on("detach", function(device) {
-  console.log("Detacehd!");
+  console.log("Detached!");
   console.log(device);
 });
 
