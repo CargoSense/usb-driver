@@ -53,7 +53,7 @@ USBDrive.prototype.waitForEvents = function() {
 };
 
 module.exports = function() {
-  if (!driver) {
+  if (!usbDrive) {
     usbDrive = new USBDrive();
   }
   return usbDrive;

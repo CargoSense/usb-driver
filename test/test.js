@@ -1,4 +1,4 @@
-var USBDrive = require('../src/main.js')();
+var USBDrive = require('../src/usbDrive.js')();
 
 USBDrive.getAll()
   .then(function(usbDrives) {

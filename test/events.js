@@ -1,4 +1,4 @@
-var USBDrive = require('../src/main.js')();
+var USBDrive = require('../src/usbDrive.js')();
 
 USBDrive.on("attach", function(device) {
   console.log("Attached!");
