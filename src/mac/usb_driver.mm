@@ -89,6 +89,18 @@ usb_service_object(io_service_t usb_service)
     USB_INFO_ATTR(properties, "USB Vendor Name", usb_info->vendor_str);
     USB_INFO_ATTR(properties, "USB Address", usb_info->device_address);
 
+#define HEXIFY(str) \
+    do { \
+	char _tmp[100]; \
+	snprintf(_tmp, sizeof _tmp, "0x%lx", atol(str.c_str())); \
+	str = _tmp; \
+    } \
+    while (0)
+
+    HEXIFY(usb_info->product_id);
+    HEXIFY(usb_info->vendor_id);
+
+#undef HEXIFY
 #undef USB_INFO_ATTR
     CFRelease(properties);
 
