@@ -53,7 +53,7 @@ namespace {
 	    NanAssignPersistent(js_watcher, obj);
 	}
 
-	~NodeUSBWatcher() {
+	virtual ~NodeUSBWatcher() {
 	    NanDisposePersistent(js_watcher);
 	}
 

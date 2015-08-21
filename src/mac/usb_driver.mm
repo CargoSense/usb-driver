@@ -229,11 +229,18 @@ watcher_disk_unmount(DADiskRef disk, void *context)
 void
 RegisterWatcher(USBWatcher *_watcher)
 {
-    if (watcher != NULL) {
-	NSLog(@"RegisterWatcher(): watcher already registered");
+    if (watcher != _watcher) {
+	if (watcher != NULL) {
+	    delete watcher;
+	}
+	watcher = _watcher;
+    }
+
+    static bool init = false;
+    if (init) {
 	return;
     }
-    watcher = _watcher;
+    init = true;
 
     DASessionRef da_session = DASessionCreate(kCFAllocatorDefault);
     assert(da_session != NULL);

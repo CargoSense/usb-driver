@@ -19,6 +19,7 @@ namespace usb_driver {
 
     class USBWatcher {
 	public:
+	virtual ~USBWatcher() { }
 	virtual void attached(struct USBDrive *usb_info) = 0;
 	virtual void detached(struct USBDrive *usb_info) = 0;
 	virtual void mount(struct USBDrive *usb_info) = 0;
