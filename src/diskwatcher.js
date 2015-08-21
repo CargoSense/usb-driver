@@ -16,19 +16,29 @@ Device Object
 
 var DiskWatcher = function() {
   var self = this;
+  this.mountMap = {};
 };
 util.inherits(DiskWatcher, EventEmitter);
 
 DiskWatcher.prototype.attach = function(device) {
+  if (device == null) {return;}
   this.emit('attach', device);
 };
 DiskWatcher.prototype.detach = function(device) {
+  if (device == null) {return;}
+  if (this.mountMap[device.id]) {
+    this.unmount(device);
+  }
   this.emit('detach', device);
 };
 DiskWatcher.prototype.mount = function(device) {
+  if (device == null) {return;}
+  this.mountMap[device.id] = true;
   this.emit('mount', device);
 };
 DiskWatcher.prototype.unmount = function(device) {
+  if (device == null) {return;}
+  delete this.mountMap[device.id];
   this.emit('unmount', device);
 };
 
