@@ -12,14 +12,7 @@ namespace {
 #define OBJ_ATTR(name, val) \
 	obj->Set(NanNew<v8::String>(name), NanNew<v8::String>(val))
 
-	std::string usb_drive_id;
-	usb_drive_id.append(usb_drive->vendor_id);
-	usb_drive_id.append("-");
-	usb_drive_id.append(usb_drive->product_id);
-	usb_drive_id.append("-");
-	usb_drive_id.append(usb_drive->location_id);
-
-	OBJ_ATTR("id", usb_drive_id);
+	OBJ_ATTR("id", usb_drive->uid);
 	OBJ_ATTR("productCode", usb_drive->product_id);
 	OBJ_ATTR("vendorCode", usb_drive->vendor_id);
 	OBJ_ATTR("product", usb_drive->product_str);

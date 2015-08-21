@@ -13,7 +13,7 @@
 namespace usb_driver {
 
 static std::vector<struct USBDrive *> all_devices;
-static std::map<std::string, struct USBDrive *> all_devices_map;
+unsigned long all_unserialized_devices_counter = 0;
 
 bool
 Unmount(const std::string &volume)
@@ -42,12 +42,12 @@ Unmount(const std::string &volume)
 struct USBDrive *
 GetDevice(const std::string &identifier)
 {
-    std::map<std::string, struct USBDrive *>::iterator iter =
-	all_devices_map.find(identifier);
-    if (iter == all_devices_map.end()) {
-	return NULL;
+    for (unsigned int i = 0; i < all_devices.size(); i++) {
+	if (all_devices[i]->uid == identifier) {
+	    return all_devices[i];
+	}
     }
-    return iter->second;
+    return NULL;
 }
 
 struct USBDrive_Mac {
@@ -66,28 +66,40 @@ usb_service_object(io_service_t usb_service)
 	return NULL;
     }
 
-    struct USBDrive *usb_info = new struct USBDrive;
-    assert(usb_info != NULL);
-    struct USBDrive_Mac *usb_info_mac = new struct USBDrive_Mac;
-    assert(usb_info_mac != NULL);
-    usb_info->opaque = (void *)usb_info_mac;
-
-#define USB_INFO_ATTR(dict, key, var) \
-    do { \
+#define PROP_VAL(dict, key) \
+    ({ \
 	id _obj = (id)CFDictionaryGetValue(dict, CFSTR(key)); \
-	if (_obj != nil) { \
-	    var = [[_obj description] UTF8String]; \
-	} \
-    } \
-    while (0)
+	_obj != nil ? [[_obj description] UTF8String] : ""; \
+    })
 
-    USB_INFO_ATTR(properties, "locationID", usb_info->location_id);
-    USB_INFO_ATTR(properties, "idProduct", usb_info->product_id);
-    USB_INFO_ATTR(properties, "idVendor", usb_info->vendor_id);
-    USB_INFO_ATTR(properties, "USB Product Name", usb_info->product_str);
-    USB_INFO_ATTR(properties, "USB Serial Number", usb_info->serial_str);
-    USB_INFO_ATTR(properties, "USB Vendor Name", usb_info->vendor_str);
-    USB_INFO_ATTR(properties, "USB Address", usb_info->device_address);
+    struct USBDrive *usb_info = NULL;
+    struct USBDrive_Mac *usb_info_mac = NULL;
+    std::string location_id = PROP_VAL(properties, "locationID");
+
+    for (unsigned int i = 0; i < all_devices.size(); i++) {
+	if (all_devices[i]->location_id == location_id) {
+	    usb_info = all_devices[i];
+	    usb_info_mac = (struct USBDrive_Mac *)usb_info->opaque;
+	    break;
+	}
+    }
+
+    if (usb_info == NULL) {
+	usb_info = new struct USBDrive;
+	assert(usb_info != NULL);
+	usb_info_mac = new struct USBDrive_Mac;
+	assert(usb_info_mac != NULL);
+	usb_info->opaque = (void *)usb_info_mac;
+	all_devices.push_back(usb_info);
+    }
+
+    usb_info->location_id = location_id;
+    usb_info->vendor_id = PROP_VAL(properties, "idVendor");
+    usb_info->product_id = PROP_VAL(properties, "idProduct");
+    usb_info->serial_str = PROP_VAL(properties, "USB Serial Number");
+    usb_info->product_str = PROP_VAL(properties, "USB Product Name");
+    usb_info->vendor_str = PROP_VAL(properties, "USB Vendor Name");
+    usb_info->device_address = PROP_VAL(properties, "USB Address");
 
 #define HEXIFY(str) \
     do { \
@@ -101,8 +113,26 @@ usb_service_object(io_service_t usb_service)
     HEXIFY(usb_info->vendor_id);
 
 #undef HEXIFY
-#undef USB_INFO_ATTR
+#undef PROP_VAL
+
     CFRelease(properties);
+
+    // Generate unique device ID (https://github.com/CargoSense/usb-driver/wiki/Device-Object).
+    if (usb_info->uid.size() == 0) {
+	usb_info->uid.append(usb_info->vendor_id);
+	usb_info->uid.append("-");
+	usb_info->uid.append(usb_info->product_id);
+	usb_info->uid.append("-");
+	if (usb_info->serial_str.size() > 0) {
+	    usb_info->uid.append(usb_info->serial_str);
+	}
+	else {
+	    char buf[100];
+	    snprintf(buf, sizeof buf, "0x%lx",
+		    all_unserialized_devices_counter++);
+	    usb_info->uid.append(buf);
+	}
+    }
 
     id bsd_name = (id)IORegistryEntrySearchCFProperty(usb_service,
 	    kIOServicePlane, CFSTR(kIOBSDNameKey), kCFAllocatorDefault,
@@ -137,7 +167,6 @@ usb_service_object(io_service_t usb_service)
 	}
 	CFRelease(da_session);
     }
-
     return usb_info;
 }
 
@@ -154,6 +183,7 @@ GetDevices(void)
     CFDictionaryRef usb_matching = IOServiceMatching(kIOUSBDeviceClassName);
     assert(usb_matching != NULL);
 
+    std::vector<struct USBDrive *> devices;
     io_iterator_t iter = 0;
     err = IOServiceGetMatchingServices(kIOMasterPortDefault, usb_matching,
 	    &iter);
@@ -162,26 +192,23 @@ GetDevices(void)
 		mach_error_string(err));
     }
     else {
-	all_devices.clear();
-
 	io_service_t usb_service;
 	while ((usb_service = IOIteratorNext(iter)) != 0) {
 	    struct USBDrive *usb_info = usb_service_object(usb_service);
 	    if (usb_info != NULL) {
-		all_devices_map[usb_info->location_id] = usb_info;
-		all_devices.push_back(usb_info);
+		devices.push_back(usb_info);
 	    }
 	    IOObjectRelease(usb_service);
 	}
     }
     mach_port_deallocate(mach_task_self(), master_port);
-    return all_devices;
+    return devices;
 }
 
 static USBWatcher *watcher = NULL;
 
 static struct USBDrive *
-usb_info_from_DADisk(DADiskRef disk, bool force_lookup)
+usb_info_from_DADisk(DADiskRef disk, bool force_lookup, bool remove_after)
 {
     const char *bsd_disk_name = DADiskGetBSDName(disk);
     assert(bsd_disk_name != NULL);
@@ -194,6 +221,9 @@ usb_info_from_DADisk(DADiskRef disk, bool force_lookup)
 	struct USBDrive *usb_info = all_devices[i];
 	if (((struct USBDrive_Mac *)usb_info->opaque)->bsd_disk_name
 		== bsd_disk_name) {
+	    if (remove_after) {
+		all_devices.erase(all_devices.begin() + i);
+	    }
 	    return usb_info;
 	}
     }
@@ -203,26 +233,28 @@ usb_info_from_DADisk(DADiskRef disk, bool force_lookup)
 static void
 watcher_disk_appeared(DADiskRef disk, void *context)
 {
-    watcher->attached(usb_info_from_DADisk(disk, true));
+    watcher->mount(usb_info_from_DADisk(disk, true, false));
 }
 
 static void
 watcher_disk_disappeared(DADiskRef disk, void *context)
 {
-    watcher->detached(usb_info_from_DADisk(disk, false));
+    watcher->detached(usb_info_from_DADisk(disk, false, true));
 }
 
+#if 0
 static DADissenterRef
 watcher_disk_mount(DADiskRef disk, void *context)
 {
     watcher->mount(usb_info_from_DADisk(disk, true));
     return NULL; // approve
 }
+#endif
 
 static DADissenterRef
 watcher_disk_unmount(DADiskRef disk, void *context)
 {
-    watcher->unmount(usb_info_from_DADisk(disk, false));
+    watcher->unmount(usb_info_from_DADisk(disk, false, false));
     return NULL; // approve
 }
 
@@ -258,8 +290,8 @@ RegisterWatcher(USBWatcher *_watcher)
 	    watcher_disk_appeared, NULL);
     DARegisterDiskDisappearedCallback(da_session, match_dict,
 	    watcher_disk_disappeared, NULL);
-    DARegisterDiskMountApprovalCallback(da_session, match_dict,
-	    watcher_disk_mount, NULL);
+//    DARegisterDiskMountApprovalCallback(da_session, match_dict,
+//	    watcher_disk_mount, NULL);
     DARegisterDiskUnmountApprovalCallback(da_session, match_dict,
 	    watcher_disk_unmount, NULL);
 

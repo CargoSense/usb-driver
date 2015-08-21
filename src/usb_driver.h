@@ -6,6 +6,7 @@
 
 namespace usb_driver {
     struct USBDrive {
+	std::string uid;
 	std::string location_id;
 	std::string product_id;
 	std::string vendor_id;
