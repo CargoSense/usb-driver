@@ -228,13 +228,19 @@ usb_info_from_DADisk(DADiskRef disk, bool force_lookup, bool remove_after)
 static void
 watcher_disk_appeared(DADiskRef disk, void *context)
 {
-    watcher->mount(usb_info_from_DADisk(disk, true, false));
+    struct USBDrive *usb_info = usb_info_from_DADisk(disk, true, false);
+    if (usb_info != NULL) {
+	watcher->mount(usb_info);
+    }
 }
 
 static void
 watcher_disk_disappeared(DADiskRef disk, void *context)
 {
-    watcher->detached(usb_info_from_DADisk(disk, false, true));
+    struct USBDrive *usb_info = usb_info_from_DADisk(disk, false, true);
+    if (usb_info != NULL) {
+	watcher->detached(usb_info);
+    }
 }
 
 #if 0
@@ -249,7 +255,10 @@ watcher_disk_mount(DADiskRef disk, void *context)
 static DADissenterRef
 watcher_disk_unmount(DADiskRef disk, void *context)
 {
-    watcher->unmount(usb_info_from_DADisk(disk, false, false));
+    struct USBDrive *usb_info = usb_info_from_DADisk(disk, false, false);
+    if (usb_info != NULL) {
+	watcher->unmount(usb_info);
+    }
     return NULL; // approve
 }
 

@@ -73,16 +73,10 @@ namespace {
 	private:
 	void
 	emit(const char *msg, struct usb_driver::USBDrive *usb_info) {
+	    assert(usb_info != NULL);
+
 	    Local<Object> rcv = NanNew<Object>(js_watcher);
-
-	    Handle<Value> argv[1];
-	    if (usb_info != NULL) {
-		argv[0] = USBDrive_to_Object(usb_info);
-	    }
-	    else {
-		argv[0] = NanNull();
-	    };
-
+	    Handle<Value> argv[1] = { USBDrive_to_Object(usb_info) };
 	    NanMakeCallback(rcv, NanNew<v8::String>(msg), 1, argv);
 	}
     };
