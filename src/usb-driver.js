@@ -37,12 +37,12 @@ USBDriver.prototype.get = function(id) {
   });
 };
 
-USBDriver.prototype.unmount = function(volume) {
+USBDriver.prototype.unmount = function(deviceId) {
   return new Promise(function(resolve, reject) {
-    if( USBNativeDriver.unmount(volume) ) {
+    if (USBNativeDriver.unmount(deviceId)) {
       resolve(true);
     } else {
-      reject(false);
+      reject();
     }
   });
 };
