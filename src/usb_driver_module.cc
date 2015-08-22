@@ -10,7 +10,16 @@ namespace {
 	Local<Object> obj = NanNew<Object>();
 
 #define OBJ_ATTR(name, val) \
-	obj->Set(NanNew<v8::String>(name), NanNew<v8::String>(val))
+	do { \
+	    Local<String> _name = NanNew<v8::String>(name); \
+	    if (val.size() > 0) { \
+		obj->Set(_name, NanNew<v8::String>(val)); \
+	    } \
+	    else { \
+		obj->Set(_name, NanNull()); \
+	    } \
+	} \
+	while (0)
 
 	OBJ_ATTR("id", usb_drive->uid);
 	OBJ_ATTR("productCode", usb_drive->product_id);
