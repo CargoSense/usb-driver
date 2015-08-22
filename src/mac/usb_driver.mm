@@ -150,16 +150,11 @@ usb_service_object(io_service_t usb_service)
 	if (disk != NULL) {
 	    CFDictionaryRef desc = DADiskCopyDescription(disk);
 	    if (desc != NULL) {
-		id path = (id)CFDictionaryGetValue(desc,
+		id path_url = (id)CFDictionaryGetValue(desc,
                         kDADiskDescriptionVolumePathKey);
-		if (path != nil) {
-		    std::string path_str = [[path description] UTF8String];
-		    // Since we get an URI, we need to determine the UNIX
-		    // path from it.
-		    size_t off = path_str.find("/Volumes");
-		    if (off != std::string::npos) {
-			usb_info->mount = path_str.substr(off);
-		    }
+		if (path_url != nil
+			&& [path_url isKindOfClass:[NSURL class]]) {
+		    usb_info->mount = [path_url fileSystemRepresentation];
 		}
 		CFRelease(desc);
 	    }
