@@ -16,14 +16,15 @@ static std::vector<struct USBDrive *> all_devices;
 unsigned long all_unserialized_devices_counter = 0;
 
 bool
-Unmount(const std::string &volume)
+Unmount(const std::string &identifier)
 {
-    if (volume.size() > 0) {
+    struct USBDrive *usb_info = GetDevice(identifier);
+    if (usb_info != NULL && usb_info->mount.size() > 0) {
 	DASessionRef da_session = DASessionCreate(kCFAllocatorDefault);
 	assert(da_session != NULL);
 	CFURLRef volume_path = CFURLCreateFromFileSystemRepresentation(
-		kCFAllocatorDefault, (const UInt8 *)volume.c_str(),
-		volume.size(), true);
+		kCFAllocatorDefault, (const UInt8 *)usb_info->mount.c_str(),
+		usb_info->mount.size(), true);
 	assert(volume_path != NULL);
 	DADiskRef disk = DADiskCreateFromVolumePath(kCFAllocatorDefault,
 		da_session, volume_path);
