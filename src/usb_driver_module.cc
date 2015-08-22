@@ -38,12 +38,12 @@ namespace {
 	NanScope();
 
 	String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
-	if (usb_driver::Unmount(*utf8_string)) {
-	    NanReturnValue(NanTrue());
-	}
-	else {
-	    NanReturnValue(NanFalse());
-	}
+	//These two params are function objects.  I don't know how to cast them.
+	//Local<Object> resolve(Local<Object>::Cast(args[1]));
+	//Local<Object> reject(Local<Object>::Cast(args[2]));
+  //usb_driver::Unmount(*utf8_string, resolve, reject);
+  usb_driver::Unmount(*utf8_string);
+  NanReturnNull();
     }
 
     class NodeUSBWatcher : public usb_driver::USBWatcher {
