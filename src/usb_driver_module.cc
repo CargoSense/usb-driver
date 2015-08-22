@@ -39,9 +39,11 @@ namespace {
 
 	String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
 	//These two params are function objects.  I don't know how to cast them.
-	//Local<Object> resolve(Local<Object>::Cast(args[1]));
-	//Local<Object> reject(Local<Object>::Cast(args[2]));
-  //usb_driver::Unmount(*utf8_string, resolve, reject);
+	//Local<Object> self(Local<Object>::Cast(args[1]));
+	//Local<Object> resolve(Local<Object>::Cast(args[2]));
+	//Local<Object> reject(Local<Object>::Cast(args[3]));
+  //usb_driver::Unmount(*utf8_string, self, resolve, reject);
+  // you can call the resolve and reject function object's .call function sending 'self as the first param
   usb_driver::Unmount(*utf8_string);
   NanReturnNull();
     }

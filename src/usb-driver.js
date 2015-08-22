@@ -39,7 +39,7 @@ USBDriver.prototype.get = function(id) {
 
 USBDriver.prototype.unmount = function(deviceId) {
   return new Promise(function(resolve, reject) {
-    USBNativeDriver.unmount(deviceId, resolve, reject);
+    USBNativeDriver.unmount(deviceId, this, resolve, reject);
   });
 };
 
