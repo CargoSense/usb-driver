@@ -99,7 +99,6 @@ usb_service_object(io_service_t usb_service)
     usb_info->serial_str = PROP_VAL(properties, "USB Serial Number");
     usb_info->product_str = PROP_VAL(properties, "USB Product Name");
     usb_info->vendor_str = PROP_VAL(properties, "USB Vendor Name");
-    usb_info->device_address = PROP_VAL(properties, "USB Address");
 
 #define HEXIFY(str) \
     do { \

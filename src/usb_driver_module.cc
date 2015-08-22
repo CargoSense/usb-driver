@@ -18,7 +18,6 @@ namespace {
 	OBJ_ATTR("product", usb_drive->product_str);
 	OBJ_ATTR("serialNumber", usb_drive->serial_str);
 	OBJ_ATTR("manufacturer", usb_drive->vendor_str);
-	OBJ_ATTR("deviceAddress", usb_drive->device_address);
 	OBJ_ATTR("mount", usb_drive->mount);
 
 #undef OBJ_ATTR

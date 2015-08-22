@@ -13,7 +13,6 @@ namespace usb_driver {
 	std::string product_str;
 	std::string serial_str;
 	std::string vendor_str;
-	std::string device_address;
 	std::string mount;
 	void *opaque;
     };
