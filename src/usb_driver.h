@@ -26,9 +26,9 @@ namespace usb_driver {
 	virtual void unmount(struct USBDrive *usb_info) = 0;
     };
 
-    std::vector<struct USBDrive *> GetDevices();
-    struct USBDrive *GetDevice(const std::string &id);
-    bool Unmount(const std::string &volume);
+    std::vector<struct USBDrive *> GetDevices(void);
+    struct USBDrive *GetDevice(const std::string &device_id);
+    bool Unmount(const std::string &device_id);
     void RegisterWatcher(USBWatcher *watcher);
     void WaitForEvents(void);
 }
