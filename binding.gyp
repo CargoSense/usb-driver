@@ -34,6 +34,11 @@
           'sources': [
             'src/win/usb_driver.cc',
           ],
+          'link_settings': {
+             'libraries': [
+                '-lsetupapi.lib'
+	     ]
+	  }
         }],
         ['OS=="linux"', {
           'sources': [
