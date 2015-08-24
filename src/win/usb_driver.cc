@@ -258,7 +258,7 @@ GetDevices(void)
 	    usb_info->product_str = device_name;
 	    usb_info->serial_str = serial;
 	    usb_info->vendor_str = ""; // TODO
-	    usb_info->mount = mount; // TODO
+	    usb_info->mount = mount;
 
 	    devices.push_back(usb_info);
 	}
