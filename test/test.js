@@ -11,7 +11,7 @@ USBDriver.getAll()
             console.log("Get: "+usbDrive.id);
             console.log(usbDrive)
             if (usbDrive.mount) {
-              USBDriver.unmount(usbDrive.mount)
+              USBDriver.unmount(usbDrive.id)
                 .then(function() {
                   console.log("Unmounted");
                 })
