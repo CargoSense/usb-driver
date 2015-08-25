@@ -122,7 +122,7 @@ drive_for_device_number(ULONG device_number)
 {
     if (device_drives_cache.size() == 0) {
 	std::bitset<32> drives(GetLogicalDrives());
-	for (char c = 'A'; c <= 'Z'; c++) {
+	for (char c = 'D'; c <= 'Z'; c++) {
 	    if (!drives[c - 'A']) {
 		continue;
 	    }
