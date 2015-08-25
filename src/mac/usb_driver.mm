@@ -32,6 +32,7 @@ Unmount(const std::string &identifier)
 	    // TODO: pass error callback and escalate error to JS.
 	    DADiskUnmount(disk, kDADiskUnmountOptionDefault, NULL, NULL);
 	    CFRelease(disk);
+	    usb_info->mount = "";
 	    return true;
 	}
 	CFRelease(volume_path);
