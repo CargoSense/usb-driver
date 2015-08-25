@@ -16,6 +16,8 @@
 
 namespace usb_driver {
 
+static std::vector<struct USBDrive *> all_devices;
+
 static void
 print_error(const char *func_name)
 {
@@ -129,9 +131,8 @@ drive_for_device_number(ULONG device_number)
 	    std::string path = std::string("\\\\.\\") + c + ":";
 
 	    HANDLE drive_handle = CreateFileA(path.c_str(), GENERIC_READ,
-		    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-		    OPEN_EXISTING, FILE_FLAG_NO_BUFFERING
-		    | FILE_FLAG_RANDOM_ACCESS, NULL);
+		    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+		    FILE_FLAG_NO_BUFFERING | FILE_FLAG_RANDOM_ACCESS, NULL);
 	    if (drive_handle == INVALID_HANDLE_VALUE) {
 		print_error("CreateFileA()");
 		continue;
@@ -157,10 +158,14 @@ drive_for_device_number(ULONG device_number)
     return mount;
 }
 
+struct USBDrive_Win {
+    DEVINST device_inst;
+};
+
 std::vector<struct USBDrive *>
 GetDevices(void)
 {
-    std::vector<struct USBDrive *> devices;
+    all_devices.clear();
 
     const GUID *guid = &GUID_DEVINTERFACE_DISK;
     HDEVINFO device_info = SetupDiGetClassDevs(guid, NULL, NULL,
@@ -244,6 +249,11 @@ GetDevices(void)
 
 	    struct USBDrive *usb_info = new struct USBDrive;
 	    assert(usb_info != NULL);
+	    struct USBDrive_Win *usb_info2 = new struct USBDrive_Win;
+	    assert(usb_info2 != NULL);
+
+	    usb_info->opaque = (void *)usb_info2;
+	    usb_info2->device_inst = dev_inst_parent;
 
 	    usb_info->uid = "";
 	    usb_info->uid.append(vid);
@@ -260,23 +270,43 @@ GetDevices(void)
 	    usb_info->vendor_str = ""; // TODO
 	    usb_info->mount = mount;
 
-	    devices.push_back(usb_info);
+	    all_devices.push_back(usb_info);
 	}
     }
-    return devices;
+    return all_devices;
 }
 
 struct USBDrive *
 GetDevice(const std::string &device_id)
 {
-    // TODO: implement
+    for (unsigned int i = 0; i < all_devices.size(); i++) {
+	struct USBDrive *usb_info = all_devices[i];
+	if (usb_info->uid == device_id) {
+	    return usb_info;
+	}
+    }
     return NULL;
 }
 
 bool
 Unmount(const std::string &device_id)
 {
-    // TODO: implement
+    struct USBDrive *usb_info = GetDevice(device_id);
+    if (usb_info == NULL || usb_info->mount.size() == 0) {
+	return false;
+    }
+
+    PNP_VETO_TYPE VetoType = PNP_VetoTypeUnknown;
+    char VetoName[MAX_PATH];
+    VetoName[0] = '\0';
+
+    if (CM_Request_Device_Eject(
+		((struct USBDrive_Win *)usb_info->opaque)->device_inst,
+		&VetoType, VetoName, MAX_PATH, 0) == CR_SUCCESS) {
+	usb_info->mount = "";
+	return true;
+    }
+    printf("error when requesting device eject %d: %s\n", VetoType, VetoName);
     return false;
 }
 
