@@ -9,6 +9,7 @@
 #include <winioctl.h>
 #include <usbioctl.h>
 #include <cfgmgr32.h>
+#include <dbt.h>
 #include <assert.h>
 
 #include <map>
@@ -165,6 +166,13 @@ struct USBDrive_Win {
 std::vector<struct USBDrive *>
 GetDevices(void)
 {
+    for (unsigned int i = 0; i < all_devices.size(); i++) {
+	struct USBDrive *usb_info = all_devices[i];
+	struct USBDrive_Win *usb_info_win =
+	    (struct USBDrive_Win *)usb_info->opaque;
+	delete usb_info_win;
+	delete usb_info;
+    }
     all_devices.clear();
 
     const GUID *guid = &GUID_DEVINTERFACE_DISK;
@@ -221,6 +229,8 @@ GetDevices(void)
 		continue;
 	    }
 
+	    free(interface_detail);
+
 	    std::string mount = "";
 	    ULONG device_number = device_number_from_handle(handle);
 	    if (device_number != 0) {
@@ -262,7 +272,7 @@ GetDevices(void)
 	    usb_info->uid.append("-");
 	    usb_info->uid.append(serial);
 
-	    usb_info->location_id = ""; // TODO
+	    usb_info->location_id = ""; // Not set.
 	    usb_info->product_id = pid;
 	    usb_info->vendor_id = vid;
 	    usb_info->product_str = device_name;
@@ -303,22 +313,112 @@ Unmount(const std::string &device_id)
     if (CM_Request_Device_Eject(
 		((struct USBDrive_Win *)usb_info->opaque)->device_inst,
 		&VetoType, VetoName, MAX_PATH, 0) == CR_SUCCESS) {
-	usb_info->mount = "";
 	return true;
     }
     printf("error when requesting device eject %d: %s\n", VetoType, VetoName);
     return false;
 }
 
-void
-RegisterWatcher(USBWatcher *watcher)
+static USBWatcher *watcher = NULL;
+
+static char
+drive_letter_from_unitmask(DWORD unitmask)
 {
-    // TODO: implement
+    char i;
+    for (i = 0; i < 26; ++i) {
+	if (unitmask & 0x1) {
+	    break;
+	}
+	unitmask = unitmask >> 1;
+    }
+    return i + 'A';
 }
 
-void WaitForEvents(void)
+static LRESULT CALLBACK
+WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
-    // TODO: implement
+    if (uiMsg == WM_DEVICECHANGE
+	    && (wParam == DBT_DEVICEARRIVAL
+		|| wParam == DBT_DEVICEREMOVECOMPLETE)) {
+	DEV_BROADCAST_HDR *device = (DEV_BROADCAST_HDR *)lParam;
+	if (device->dbch_devicetype == DBT_DEVTYP_VOLUME) {
+	    DEV_BROADCAST_VOLUME *volume = (DEV_BROADCAST_VOLUME *)lParam;
+	    char drive = drive_letter_from_unitmask(volume->dbcv_unitmask);
+	    if (wParam == DBT_DEVICEARRIVAL) {
+		GetDevices();
+	    }
+	    for (int i = 0; i < all_devices.size(); i++) {
+		struct USBDrive *usb_info = all_devices[i];
+		if (usb_info->mount[0] == drive) {
+		    if (wParam == DBT_DEVICEARRIVAL) {
+			watcher->mount(usb_info);
+		    }
+		    else if (wParam == DBT_DEVICEREMOVECOMPLETE) {
+			watcher->unmount(usb_info);
+		    }
+		    return 0;
+		}
+	    }
+	}
+    }
+    return DefWindowProc(hWnd, uiMsg, wParam, lParam);
+}
+
+void
+RegisterWatcher(USBWatcher *_watcher)
+{
+    if (watcher != _watcher) {
+	if (watcher != NULL) {
+	    delete watcher;
+	}
+	watcher = _watcher;
+    }
+
+    static bool init = false;
+    if (init) {
+	return;
+    }
+    init = true;
+
+    HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL));
+
+    WNDCLASS wndClass = {0};
+    wndClass.lpfnWndProc = &WndProc;
+    wndClass.lpszClassName = TEXT("usb-driver");
+    wndClass.hInstance = hInstance;
+
+    if (!RegisterClass(&wndClass)) {
+	print_error("RegisterClass");
+	return;
+    }
+
+    HWND lua = CreateWindow(wndClass.lpszClassName, NULL, 0, CW_USEDEFAULT,
+	    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL,
+	    hInstance, NULL);
+    if (lua == NULL) {
+	print_error("CreateWindow");
+	return;
+    }
+
+    DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
+    ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
+
+    NotificationFilter.dbcc_size = sizeof(NotificationFilter);
+    NotificationFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+    NotificationFilter.dbcc_reserved = 0;
+    NotificationFilter.dbcc_classguid = GUID_DEVINTERFACE_USB_DEVICE;
+
+    if (RegisterDeviceNotification(lua, &NotificationFilter,
+		DEVICE_NOTIFY_WINDOW_HANDLE) == NULL) {
+	print_error("RegisterDeviceNotification");
+	return;
+    }
+}
+
+void
+WaitForEvents(void)
+{
+    printf("WaitForEvents() is not implemented on Windows.\n");
 }
 
 }  // namespace usb_driver
