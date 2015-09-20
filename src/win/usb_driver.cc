@@ -93,6 +93,7 @@ parse_device_id(const char *device_path, std::string &vid,
 	    return false;
 	}
 	if (*p == '&') {
+	    // No serial.
 	    return true;
 	}
 	pid.push_back(tolower(*p));
@@ -100,6 +101,11 @@ parse_device_id(const char *device_path, std::string &vid,
      }
      p++;
      while (*p != '\0') {
+	if (*p == '&') {
+	    // No serial.
+	    serial.clear();
+	    return true;
+	}
 	serial.push_back(toupper(*p));
 	p++;
      }
