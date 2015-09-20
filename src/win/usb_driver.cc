@@ -18,6 +18,7 @@
 namespace usb_driver {
 
 static std::vector<struct USBDrive *> all_devices;
+static unsigned long all_devices_serial_inc = 0;
 
 static void
 print_error(const char *func_name)
@@ -84,17 +85,20 @@ parse_device_id(const char *device_path, std::string &vid,
 	return false;
      }
      p += 4;
+     serial.clear();
      pid.clear();
      pid.append("0x");
      while (*p != '\\') {
 	if (*p == '\0') {
 	    return false;
 	}
+	if (*p == '&') {
+	    return true;
+	}
 	pid.push_back(tolower(*p));
 	p++;
      }
      p++;
-     serial.clear();
      while (*p != '\0') {
 	serial.push_back(toupper(*p));
 	p++;
@@ -270,7 +274,14 @@ GetDevices(void)
 	    usb_info->uid.append("-");
 	    usb_info->uid.append(pid);
 	    usb_info->uid.append("-");
-	    usb_info->uid.append(serial);
+	    if (serial.size() > 0) {
+		usb_info->uid.append(serial);
+	    }
+	    else {
+		char buf[100];
+		sprintf_s(buf, sizeof buf, "0x%lx", all_devices_serial_inc++);
+		usb_info->uid.append(buf);
+	    }
 
 	    usb_info->location_id = ""; // Not set.
 	    usb_info->product_id = pid;
@@ -347,7 +358,7 @@ WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 	    if (wParam == DBT_DEVICEARRIVAL) {
 		GetDevices();
 	    }
-	    for (int i = 0; i < all_devices.size(); i++) {
+	    for (unsigned int i = 0; i < all_devices.size(); i++) {
 		struct USBDrive *usb_info = all_devices[i];
 		if (usb_info->mount[0] == drive) {
 		    if (wParam == DBT_DEVICEARRIVAL) {
