@@ -362,6 +362,7 @@ WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 	    DEV_BROADCAST_VOLUME *volume = (DEV_BROADCAST_VOLUME *)lParam;
 	    char drive = drive_letter_from_unitmask(volume->dbcv_unitmask);
 	    if (wParam == DBT_DEVICEARRIVAL) {
+		device_drives_cache.clear();
 		GetDevices();
 	    }
 	    for (unsigned int i = 0; i < all_devices.size(); i++) {
