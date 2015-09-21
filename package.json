@@ -8,11 +8,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/CargoSense/usb-drive.git"
+    "url": "git://github.com/CargoSense/usb-driver.git"
   },
   "dependencies" : {
-    "bluebird" : "latest",
-    "nan": "https://atom.io/download/atom-shell/nan-1.6.1.tgz"
+    "bluebird" : "~2.9.2",
+    "nan": "~1.6.1"
   },
   "keywords": [
     "usb"
