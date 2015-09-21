@@ -32,8 +32,7 @@ usbDriver.getAll().then(function(devices) {
 }).catch(function(err) { /* ... error handling */ });
 ```
 
-`devices` is an array of device objects. See "Device Objects"
-below.
+`devices` is an array of device objects. See [Device Objects](#device-objects).
 
 #### Get a device by ID
 
@@ -46,7 +45,7 @@ usbDriver.get(deviceId).then(function(device) {
 ```
 
 `deviceId` is be the `id` provided in the device objects from
-`getAll()`, and `device` is a device object. See "Device Objects" below.
+`getAll()`, and `device` is a device object. See [Device Objects](#device-objects).
 
 #### Unmount a (mass storage) device
 
@@ -62,7 +61,7 @@ usbDriver.unmount(deviceId).then(function() {
 ```
 
 `deviceId` should be the `id` provided in the device object from `get()` or
-`getAll()`. See "Device Objects" below.
+`getAll()`. See [Device Objects](#device-objects).
 
 ### Events
 
@@ -72,7 +71,7 @@ usbDriver.unmount(deviceId).then(function() {
 usbDriver.on('attach', function(device) { /* ... */ });
 ```
 
-`device` is a device object. See "Device Objects," below.
+`device` is a device object. See [Device Objects](#device-objects).
 
 #### Watch for detach events
 
@@ -80,7 +79,7 @@ usbDriver.on('attach', function(device) { /* ... */ });
 usbDriver.on('detach', function(device) { /* ... */ });
 ```
 
-`device` is a device object. See "Device Objects," below.
+`device` is a device object. See [Device Objects](#device-objects).
 
 #### Watch for mount events
 
@@ -90,7 +89,7 @@ When a USB device is mounted.
 usbDriver.on('mount', function(device) { /* ... */ });
 ```
 
-`device` is a device object. See "Device Objects," below.
+`device` is a device object. See [Device Objects](#device-objects).
 
 #### Watch for unmount events
 
@@ -100,7 +99,7 @@ When a USB device is unmounted.
 usbDriver.on('unmount', function(device) { /* ... */ });
 ```
 
-`device` is a device object. See "Device Objects," below.
+`device` is a device object. See [Device Objects](#device-objects).
 
 ### Device Objects
 
