@@ -1,27 +1,39 @@
 #include "../usb_driver.h"
 
-#include <iostream>
-
 namespace usb_driver {
 
-bool Unmount(const std::string& volume) {
-  std::cout << "Unmount volume: ";
-  std::cout << volume << std::endl;
-  if (umount2(volume.c_str()) == 0) {
-    return true;
-  } else {
+bool
+Unmount(const std::string &identifier)
+{
+    // TODO
     return false;
-  }
 }
 
-void GetDevice(const std::string& identifier) {
-  std::cout << "Get Device: ";
-  std::cout << identifier << std::endl;
+struct USBDrive *
+GetDevice(const std::string &identifier)
+{
+    // TODO
+    return NULL;
 }
 
-void GetDevices() {
-  std::cout << "Get Devices";
-  std::cout << std::endl;
+std::vector<struct USBDrive *>
+GetDevices(void)
+{
+    // TODO
+    std::vector<struct USBDrive *> devices;
+    return devices;
+}
+
+void
+RegisterWatcher(USBWatcher *_watcher)
+{
+    // TODO
+}
+
+void
+WaitForEvents(void)
+{
+    // TODO
 }
 
 }  // namespace usb_driver
