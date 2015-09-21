@@ -1,16 +1,16 @@
 {
   "name": "usb-driver",
-  "version": "0.0.1",
-  "description": "Driver for USB/Disck Events and Handling",
+  "version": "0.1.0",
+  "description": "Cross-platform driver for USB device metadata and events",
   "main": "./src/usb-driver.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/CargoSense/usb-drive.git"
   },
-  "dependencies" : { 
+  "dependencies" : {
     "bluebird" : "latest",
     "nan": "https://atom.io/download/atom-shell/nan-1.6.1.tgz"
   },
@@ -18,7 +18,7 @@
     "usb"
   ],
   "author": "Rich Kilmer <rich.kilmer@gmail.com> (http://www.cargosense.com/)",
-  "license": "MIT",
+  "license": "Apache 2",
   "bugs": {
     "url": "https://github.com/CargoSense/usb-drive/issues"
   }
