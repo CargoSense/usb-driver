@@ -1,6 +1,6 @@
 {
   "name": "usb-driver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-platform driver for USB device metadata and events",
   "main": "./src/usb-driver.js",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "bluebird": "~2.9.2",
-    "nan": "~1.6.1"
+    "nan": "<2.0"
   },
   "keywords": [
     "usb"
