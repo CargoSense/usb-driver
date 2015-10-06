@@ -8,6 +8,10 @@ Cross-platform USB device metadata and events.
 * Windows
 * ~~Linux~~ (Planned)
 
+## Requirements
+
+* Node.js v0.12.x
+
 ## Install
 
 ```
