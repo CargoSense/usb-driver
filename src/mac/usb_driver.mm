@@ -176,7 +176,12 @@ GetDevices(void)
 		mach_error_string(err));
     }
 
-    CFDictionaryRef usb_matching = IOServiceMatching(kIOUSBDeviceClassName);
+    NSOperatingSystemVersion osx_version =
+	[[NSProcessInfo processInfo] operatingSystemVersion];
+    CFDictionaryRef usb_matching =
+	IOServiceMatching((osx_version.majorVersion == 10
+		    && osx_version.minorVersion >= 11)
+		? "IOUSBHostDevice" : kIOUSBDeviceClassName);
     assert(usb_matching != NULL);
 
     std::vector<struct USBDrive *> devices;
