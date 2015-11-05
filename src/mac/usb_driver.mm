@@ -21,11 +21,25 @@ static usb_driver::USBWatcher *watcher = NULL;
 
 @implementation WatcherDelayedCallback
 
+- (void)delay_mount
+{
+    [self performSelector:@selector(send_mount_event) withObject:nil
+	afterDelay:0.1];
+}
+
 - (void)send_mount_event
 {
-    assert(usb_info != NULL);
-    usb_driver::GetDevices();
-    watcher->mount(usb_info);
+    if (usb_info != NULL) {
+	usb_driver::GetDevices();
+	if (usb_info->mount.size() > 0) {
+	    watcher->mount(usb_info);
+	    usb_info = NULL;
+	    [self autorelease];
+	}
+	else {
+	    [self delay_mount];
+	}
+    }
 }
 
 @end
@@ -264,8 +278,7 @@ watcher_disk_appeared(DADiskRef disk, void *context)
 	    // the DAVolumePath key isn't set yet.
 	    WatcherDelayedCallback *o = [[WatcherDelayedCallback alloc] init];
 	    o->usb_info = usb_info;
-	    [o performSelector:@selector(send_mount_event) withObject:nil
-		afterDelay:1.0];
+	    [o delay_mount];
 	}
 	else {
 	    watcher->mount(usb_info);
