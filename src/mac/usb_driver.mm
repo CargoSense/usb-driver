@@ -10,6 +10,34 @@
 
 #include <map>
 
+static usb_driver::USBWatcher *watcher = NULL;
+
+@interface WatcherDelayedCallback : NSObject
+{
+    @public
+	struct usb_driver::USBDrive *usb_info;
+}
+@end
+
+@implementation WatcherDelayedCallback
+
+- (void)send_mount_event
+{
+    assert(usb_info != NULL);
+    usb_driver::GetDevices();
+    watcher->mount(usb_info);
+}
+
+@end
+
+static bool
+el_capitan_or_higher(void)
+{
+    NSOperatingSystemVersion osx_version =
+	[[NSProcessInfo processInfo] operatingSystemVersion];
+    return osx_version.majorVersion == 10 && osx_version.minorVersion >= 11;
+}
+
 namespace usb_driver {
 
 static std::vector<struct USBDrive *> all_devices;
@@ -176,11 +204,8 @@ GetDevices(void)
 		mach_error_string(err));
     }
 
-    NSOperatingSystemVersion osx_version =
-	[[NSProcessInfo processInfo] operatingSystemVersion];
     CFDictionaryRef usb_matching =
-	IOServiceMatching((osx_version.majorVersion == 10
-		    && osx_version.minorVersion >= 11)
+	IOServiceMatching(el_capitan_or_higher()
 		? "IOUSBHostDevice" : kIOUSBDeviceClassName);
     assert(usb_matching != NULL);
 
@@ -205,8 +230,6 @@ GetDevices(void)
     mach_port_deallocate(mach_task_self(), master_port);
     return devices;
 }
-
-static USBWatcher *watcher = NULL;
 
 static struct USBDrive *
 usb_info_from_DADisk(DADiskRef disk, bool force_lookup, bool remove_after)
@@ -236,7 +259,17 @@ watcher_disk_appeared(DADiskRef disk, void *context)
 {
     struct USBDrive *usb_info = usb_info_from_DADisk(disk, true, false);
     if (usb_info != NULL) {
-	watcher->mount(usb_info);
+	if (el_capitan_or_higher()) {
+	    // Work around what seems to be a race condition in 10.11 where
+	    // the DAVolumePath key isn't set yet.
+	    WatcherDelayedCallback *o = [[WatcherDelayedCallback alloc] init];
+	    o->usb_info = usb_info;
+	    [o performSelector:@selector(send_mount_event) withObject:nil
+		afterDelay:1.0];
+	}
+	else {
+	    watcher->mount(usb_info);
+	}
     }
 }
 
