@@ -24,6 +24,8 @@ namespace node_bindings {
   }                                               \
   while(0)
 
+#define ISO_THROW_AND_RETURN(msg) THROW_AND_RETURN(Isolate::GetCurrent(), msg);
+
   static Local<Object>
   USBDrive_to_Object(Isolate *isolate, struct usb_driver::USBDrive *usb_drive)
   {
@@ -80,12 +82,10 @@ namespace node_bindings {
 
   public:
     NodeUSBWatcher(Local<Object> obj) {
-      js_watcher.Reset(obj);
+      js_watcher.Reset(Isolate::GetCurrent(), obj);
     }
 
-    virtual ~NodeUSBWatcher() {
-      js_watcher.Reset();
-    }
+    virtual ~NodeUSBWatcher() {}
 
     virtual void
     attached(struct usb_driver::USBDrive *usb_info) {
@@ -112,17 +112,26 @@ namespace node_bindings {
     emit(const char *msg, struct usb_driver::USBDrive *usb_info) {
       assert(usb_info != NULL);
 
-      Local<Object> rcv = Nan::New<Object>(js_watcher);
-      Handle<Value> argv[1] = { USBDrive_to_Object(usb_info) };
+      auto isolate = Isolate::GetCurrent();
 
-      Nan::MakeCallback(rcv, Nan::New<v8::String>(msg), 1, argv).ToLocalChecked();
+      //Local<Object> rcv = Object::New(isolate, js_watcher);
+      //Handle<Value> argv[1] = { USBDrive_to_Object(isolate, usb_info) };
+
+      //Nan::MakeCallback(rcv, String::NewFromUtf8(isolate, msg), 1, argv).ToLocalChecked();
     }
   };
 
 
   void RegisterWatcher(const FunctionCallbackInfo<Value> &info)
   {
-    Local<Object> js_watcher(Local<Object>::Cast(info[0]));
+    if(info.Length() < 1)
+      ISO_THROW_AND_RETURN("Wrong number of arguments");
+
+    if(!info[0]->IsObject())
+      ISO_THROW_AND_RETURN("Expected the first argument to be of type object");
+
+    Local<Object> js_watcher = info[0]->ToObject();
+
     NodeUSBWatcher *watcher = new NodeUSBWatcher(js_watcher);
 
     usb_driver::RegisterWatcher(watcher);
@@ -142,7 +151,13 @@ namespace node_bindings {
   {
     //Nan::HandleScope scope;
     //String::Utf8Value utf8_string(Local<String>::Cast(info[0]));
-    Isolate *isolate = info.GetIsolate();
+    auto isolate = info.GetIsolate();
+
+    if(info.Length() < 1)
+      THROW_AND_RETURN(isolate, "Wrong number of arguments");
+
+    if(!info[0]->IsString())
+      THROW_AND_RETURN(isolate, "Expected the first argument to be of type string");
 
     String::Utf8Value str(info[0]->ToString());
 
