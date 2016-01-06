@@ -53,17 +53,17 @@ namespace node_bindings {
     return obj;
   }
 
-  void Unmount(const FunctionCallbackInfo<Value> &args)
+  void Unmount(const FunctionCallbackInfo<Value> &info)
   {
-    Isolate *isolate = args.GetIsolate();
+    Isolate *isolate = info.GetIsolate();
 
-    if(args.Length() < 1)
+    if(info.Length() < 1)
       THROW_AND_RETURN(isolate, "Wrong number of arguments");
 
-    if(!args[0]->IsString())
+    if(!info[0]->IsString())
       THROW_AND_RETURN(isolate, "Expected the first argument to by of type string");
 
-    String::Utf8Value utf8_string(args[0]->ToString());
+    String::Utf8Value utf8_string(info[0]->ToString());
     Local<Boolean> ret;
 
     if(usb_driver::Unmount(*utf8_string)) {
@@ -72,7 +72,7 @@ namespace node_bindings {
       ret = Boolean::New(isolate, false);
     }
 
-    args.GetReturnValue().Set(ret);
+    info.GetReturnValue().Set(ret);
   }
 
   class NodeUSBWatcher : public usb_driver::USBWatcher {
@@ -120,28 +120,28 @@ namespace node_bindings {
   };
 
 
-  void RegisterWatcher(const FunctionCallbackInfo<Value> &args)
+  void RegisterWatcher(const FunctionCallbackInfo<Value> &info)
   {
-    Local<Object> js_watcher(Local<Object>::Cast(args[0]));
+    Local<Object> js_watcher(Local<Object>::Cast(info[0]));
     NodeUSBWatcher *watcher = new NodeUSBWatcher(js_watcher);
 
     usb_driver::RegisterWatcher(watcher);
 
     // Return nothing
-    args.GetReturnValue().SetNull();
+    info.GetReturnValue().SetNull();
   }
 
-  void WaitForEvents(const FunctionCallbackInfo<Value> &args)
+  void WaitForEvents(const FunctionCallbackInfo<Value> &info)
   {
     usb_driver::WaitForEvents();
     // Return nothing
-    args.GetReturnValue().SetNull();
+    info.GetReturnValue().SetNull();
   }
 
   void GetDevice(const FunctionCallbackInfo<Value> &info)
   {
     //Nan::HandleScope scope;
-    //String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
+    //String::Utf8Value utf8_string(Local<String>::Cast(info[0]));
     Isolate *isolate = info.GetIsolate();
 
     String::Utf8Value str(info[0]->ToString());
