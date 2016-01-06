@@ -10,7 +10,7 @@ Cross-platform USB device metadata and events.
 
 ## Requirements
 
-* Node.js v0.12.x
+* Node.js v0.12.x or higher
 
 ## Install
 
@@ -21,7 +21,7 @@ npm install usb-driver
 ## Usage
 
 ```js
-var usbDriver = require('usb-driver');
+var usbDriver = require('usb-driver')();
 ```
 
 ### Functions returning promises

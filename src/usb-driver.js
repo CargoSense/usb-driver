@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var DiskWatcher = require('./diskwatcher')();
-var USBNativeDriver = require('../build/Release/usb_driver.node')
+var USBNativeDriver = require('../build/Release/usb_driver.node');
+
 USBNativeDriver.registerWatcher(DiskWatcher);
 
 /*
@@ -48,7 +49,7 @@ USBDriver.prototype.unmount = function(deviceId) {
 };
 
 USBDriver.prototype.waitForEvents = function() {
-  console.log("WARNING: This method will not return.")
+  console.log("WARNING: This method will not return.");
   USBNativeDriver.waitForEvents();
 };
 
@@ -57,4 +58,4 @@ module.exports = function() {
     usbDriver = new USBDriver();
   }
   return usbDriver;
-}
+};

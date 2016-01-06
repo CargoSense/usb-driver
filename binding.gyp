@@ -12,7 +12,6 @@
   'targets': [
     {
       'target_name': 'usb_driver',
-      'include_dirs': [ '<!(node -e "require(\'nan\')")' ],
       'sources': [
         'src/usb_driver_module.cc'
       ],

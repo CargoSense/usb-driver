@@ -1,6 +1,6 @@
 {
   "name": "usb-driver",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Cross-platform driver for USB device metadata and events",
   "main": "./src/usb-driver.js",
   "scripts": {
@@ -11,8 +11,7 @@
     "url": "git://github.com/CargoSense/usb-driver.git"
   },
   "dependencies": {
-    "bluebird": "~2.9.2",
-    "nan": "<2.0"
+    "bluebird": "~2.9.2"
   },
   "keywords": [
     "usb"

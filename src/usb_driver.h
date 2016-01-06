@@ -5,32 +5,33 @@
 #include <vector>
 
 namespace usb_driver {
-    struct USBDrive {
-	std::string uid;
-	std::string location_id;
-	std::string product_id;
-	std::string vendor_id;
-	std::string product_str;
-	std::string serial_str;
-	std::string vendor_str;
-	std::string mount;
-	void *opaque;
-    };
+  typedef struct USBDrive {
+    std::string uid;
+    std::string location_id;
+    std::string product_id;
+    std::string vendor_id;
+    std::string product_str;
+    std::string serial_str;
+    std::string vendor_str;
+    std::string mount;
+    void *opaque;
+  } USBDrive;
 
-    class USBWatcher {
-	public:
-	virtual ~USBWatcher() { }
-	virtual void attached(struct USBDrive *usb_info) = 0;
-	virtual void detached(struct USBDrive *usb_info) = 0;
-	virtual void mount(struct USBDrive *usb_info) = 0;
-	virtual void unmount(struct USBDrive *usb_info) = 0;
-    };
+  class USBWatcher {
+  public:
+    virtual ~USBWatcher() { }
+    virtual void attached(struct USBDrive *usb_info) = 0;
+    virtual void detached(struct USBDrive *usb_info) = 0;
+    virtual void mount(struct USBDrive *usb_info) = 0;
+    virtual void unmount(struct USBDrive *usb_info) = 0;
+  };
 
-    std::vector<struct USBDrive *> GetDevices(void);
-    struct USBDrive *GetDevice(const std::string &device_id);
-    bool Unmount(const std::string &device_id);
-    void RegisterWatcher(USBWatcher *watcher);
-    void WaitForEvents(void);
+  std::vector<USBDrive *> GetDevices(void);
+  USBDrive *GetDevice(const std::string &device_id);
+
+  bool Unmount(const std::string &device_id);
+  void RegisterWatcher(USBWatcher *watcher);
+  void WaitForEvents(void);
 }
 
 #endif  // SRC_USB_DRIVER_H_
