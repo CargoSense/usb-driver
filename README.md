@@ -21,7 +21,7 @@ npm install usb-driver
 ## Usage
 
 ```js
-var usbDriver = require('usb-driver');
+var usbDriver = require('usb-driver')();
 ```
 
 ### Functions returning promises
