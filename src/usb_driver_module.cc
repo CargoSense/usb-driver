@@ -5,12 +5,15 @@ namespace node_bindings {
   using v8::FunctionCallbackInfo;
   using v8::Isolate;
   using v8::Local;
+  using v8::Handle;
+  using v8::Persistent;
   using v8::Exception;
 
   using v8::String;
   using v8::Boolean;
   using v8::Object;
   using v8::Null;
+  using v8::Array;
   using v8::Value;
 
 #define THROW_AND_RETURN(isolate, msg)            \
@@ -125,44 +128,50 @@ namespace node_bindings {
     usb_driver::RegisterWatcher(watcher);
 
     // Return nothing
-    args.GetReturnValue.SetNull();
+    args.GetReturnValue().SetNull();
   }
 
-  void WaitForevents(const FunctionCallbackInfo<Value> &args)
+  void WaitForEvents(const FunctionCallbackInfo<Value> &args)
   {
-    usb_driveer::WaitForEvents();
+    usb_driver::WaitForEvents();
     // Return nothing
     args.GetReturnValue().SetNull();
   }
 
-  void GetDevice(const FunctionCallbackInfo<Value> &args)
+  void GetDevice(const FunctionCallbackInfo<Value> &info)
   {
     //Nan::HandleScope scope;
     //String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
+    Isolate *isolate = info.GetIsolate();
 
-    Local<String> str(Local<String>::Cast(args[0]));
+    String::Utf8Value str(info[0]->ToString());
 
     auto usb_drive = usb_driver::GetDevice(*str);
 
     if(usb_drive == NULL) {
-      args.GetReturnValue().SetNull();
+      info.GetReturnValue().SetNull();
     } else {
-      args.GetReturnValue().Set(USBDrive_to_Object(usb_drive));
+      info.GetReturnValue().Set(USBDrive_to_Object(isolate, usb_drive));
     }
   }
 
   void GetDevices(const FunctionCallbackInfo<Value> &info)
   {
-    //Nan::HandleScope scope;
+    auto isolate = info.GetIsolate();
     auto devices = usb_driver::GetDevices();
 
-    Handle<Array> ary = Nan::New<Array>(devices.size());
+    Handle<Array> array = Array::New(isolate, devices.size());
 
-    for(const auto device : devices) {
-      ary->Set((int)i, USBDrive_to_Object(devices[i]));
+    if(array.IsEmpty())
+      THROW_AND_RETURN(isolate, "Array creation failed");
+
+    for(size_t i = 0; i < devices.size(); ++i) {
+      auto device_obj = USBDrive_to_Object(isolate, devices[i]);
+
+      array->Set((int)i, device_obj);
     }
 
-    info.GetReturnValue().Set(ary);
+    info.GetReturnValue().Set(array);
   }
 
   void
