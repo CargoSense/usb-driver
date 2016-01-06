@@ -10,9 +10,6 @@
   }                                                                     \
   while(0)
 
-// Same as THROW_AND_RETURN, but with an implicit isolate
-#define ISO_THROW_AND_RETURN(msg) THROW_AND_RETURN(v8::Isolate::GetCurrent(), msg);
-
 namespace node_bindings {
   using v8::FunctionCallbackInfo;
   using v8::Isolate;
@@ -81,43 +78,55 @@ namespace node_bindings {
   }
 
   class NodeUSBWatcher : public usb_driver::USBWatcher {
-    Persistent<Object> js_watcher;
 
   public:
-    NodeUSBWatcher(Local<Object> obj) {
-      js_watcher.Reset(Isolate::GetCurrent(), obj);
+    NodeUSBWatcher(Isolate *isolate, Local<Object> obj)
+      : m_isolate(isolate)
+    {
+      m_jsWatcher.Reset(isolate, obj);
     }
 
     virtual ~NodeUSBWatcher() {}
 
-    virtual void
-    attached(struct usb_driver::USBDrive *usb_info) {
+    /**
+     * Called on device attachment.
+     */
+    virtual void attached(usb_driver::USBDrive *usb_info) {
       emit("attach", usb_info);
     }
 
-    virtual void
-    detached(struct usb_driver::USBDrive *usb_info) {
+    /**
+     * Called on device detachment
+     */
+    virtual void detached(usb_driver::USBDrive *usb_info) {
       emit("detach", usb_info);
     }
 
-    virtual void
-    mount(struct usb_driver::USBDrive *usb_info) {
+    /**
+     * Called when a device is mounted.
+     */
+    virtual void mount(usb_driver::USBDrive *usb_info) {
       emit("mount", usb_info);
     }
 
-    virtual void
-    unmount(struct usb_driver::USBDrive *usb_info) {
+    /**
+     * Called when a device is unmounted.
+     */
+    virtual void unmount(usb_driver::USBDrive *usb_info) {
       emit("unmount", usb_info);
     }
 
   private:
-    void
-    emit(const char *msg, struct usb_driver::USBDrive *usb_info) {
+    Persistent<Object> m_jsWatcher;
+    Isolate *m_isolate;
+
+    /**
+     * Emit an event to
+     */
+    void emit(const char *name, usb_driver::USBDrive *usb_info) {
       assert(usb_info != NULL);
 
-      auto isolate = Isolate::GetCurrent();
-
-      //Local<Object> rcv = Object::New(isolate, js_watcher);
+      //Local<Object> rcv = Local<Object>::Cast(m_jsWatcher);
       //Handle<Value> argv[1] = { USBDrive_to_Object(isolate, usb_info) };
 
       //Nan::MakeCallback(rcv, String::NewFromUtf8(isolate, msg), 1, argv).ToLocalChecked();
@@ -127,15 +136,17 @@ namespace node_bindings {
 
   void RegisterWatcher(const FunctionCallbackInfo<Value> &info)
   {
+    Isolate *isolate = info.GetIsolate();
+
     if(info.Length() < 1)
-      ISO_THROW_AND_RETURN("Wrong number of arguments");
+      THROW_AND_RETURN(isolate, "Wrong number of arguments");
 
     if(!info[0]->IsObject())
-      ISO_THROW_AND_RETURN("Expected the first argument to be of type object");
+      THROW_AND_RETURN(isolate, "Expected the first argument to be of type object");
 
     Local<Object> js_watcher = info[0]->ToObject();
 
-    NodeUSBWatcher *watcher = new NodeUSBWatcher(js_watcher);
+    NodeUSBWatcher *watcher = new NodeUSBWatcher(isolate, js_watcher);
 
     usb_driver::RegisterWatcher(watcher);
 
