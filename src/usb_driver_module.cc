@@ -1,4 +1,6 @@
 #include "usb_driver.h"
+
+#include <v8.h>
 #include <node.h>
 
 // Throws a JS error and returns from the current function
@@ -126,10 +128,10 @@ namespace node_bindings {
     void emit(const char *name, usb_driver::USBDrive *usb_info) {
       assert(usb_info != NULL);
 
-      //Local<Object> rcv = Local<Object>::Cast(m_jsWatcher);
-      //Handle<Value> argv[1] = { USBDrive_to_Object(isolate, usb_info) };
+      Local<Object> rcv = Local<Object>::New(m_isolate, m_jsWatcher);
+      Handle<Value> argv[1] = { USBDrive_to_Object(m_isolate, usb_info) };
 
-      //Nan::MakeCallback(rcv, String::NewFromUtf8(isolate, msg), 1, argv).ToLocalChecked();
+      node::MakeCallback(m_isolate, rcv, String::NewFromUtf8(m_isolate, name), 1, argv);
     }
   };
 
