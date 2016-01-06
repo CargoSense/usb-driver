@@ -1,6 +1,18 @@
 #include "usb_driver.h"
 #include <node.h>
 
+// Throws a JS error and returns from the current function
+#define THROW_AND_RETURN(isolate, msg)                                  \
+  do {                                                                  \
+    isolate->ThrowException(v8::Exception::TypeError(                   \
+        v8::String::NewFromUtf8(isolate, msg)));                        \
+    return;                                                             \
+  }                                                                     \
+  while(0)
+
+// Same as THROW_AND_RETURN, but with an implicit isolate
+#define ISO_THROW_AND_RETURN(msg) THROW_AND_RETURN(v8::Isolate::GetCurrent(), msg);
+
 namespace node_bindings {
   using v8::FunctionCallbackInfo;
   using v8::Isolate;
@@ -16,15 +28,6 @@ namespace node_bindings {
   using v8::Array;
   using v8::Value;
 
-#define THROW_AND_RETURN(isolate, msg)            \
-  do {                                            \
-    isolate->ThrowException(Exception::TypeError( \
-        String::NewFromUtf8(isolate, msg)));      \
-    return;                                       \
-  }                                               \
-  while(0)
-
-#define ISO_THROW_AND_RETURN(msg) THROW_AND_RETURN(Isolate::GetCurrent(), msg);
 
   static Local<Object>
   USBDrive_to_Object(Isolate *isolate, struct usb_driver::USBDrive *usb_drive)
@@ -149,8 +152,6 @@ namespace node_bindings {
 
   void GetDevice(const FunctionCallbackInfo<Value> &info)
   {
-    //Nan::HandleScope scope;
-    //String::Utf8Value utf8_string(Local<String>::Cast(info[0]));
     auto isolate = info.GetIsolate();
 
     if(info.Length() < 1)
