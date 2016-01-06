@@ -1,7 +1,7 @@
 #include "usb_driver.h"
 #include <node.h>
 
-namespace {
+namespace node_bindings {
   using v8::FunctionCallbackInfo;
   using v8::Isolate;
   using v8::Local;
@@ -13,21 +13,29 @@ namespace {
   using v8::Null;
   using v8::Value;
 
+#define THROW_AND_RETURN(isolate, msg)            \
+  do {                                            \
+    isolate->ThrowException(Exception::TypeError( \
+        String::NewFromUtf8(isolate, msg)));      \
+    return;                                       \
+  }                                               \
+  while(0)
+
   static Local<Object>
   USBDrive_to_Object(Isolate *isolate, struct usb_driver::USBDrive *usb_drive)
   {
     Local<Object> obj = Object::New(isolate);
 
-#define OBJ_ATTR(name, val)                                             \
-    do {                                                                \
-      Local<String> _name = String::NewFromUtf8(isolate, name);         \
-      if (val.size() > 0) {                                             \
-        obj->Set(_name, String::NewFromUtf8(isolate, val.c_str()));     \
-      }                                                                 \
-      else {                                                            \
-        obj->Set(_name, Null(isolate));                                 \
-      }                                                                 \
-    }                                                                   \
+#define OBJ_ATTR(name, val)                                         \
+    do {                                                            \
+      Local<String> _name = String::NewFromUtf8(isolate, name);     \
+      if (val.size() > 0) {                                         \
+        obj->Set(_name, String::NewFromUtf8(isolate, val.c_str())); \
+      }                                                             \
+      else {                                                        \
+        obj->Set(_name, Null(isolate));                             \
+      }                                                             \
+    }                                                               \
     while (0)
 
     OBJ_ATTR("id", usb_drive->uid);
@@ -46,14 +54,13 @@ namespace {
   {
     Isolate *isolate = args.GetIsolate();
 
-    if(args.Length < 1) {
-      isolate->ThrowException(Exception::TypeError(
-        String::NewFromUtf8(isolate, "Wrong number of arguments")));
+    if(args.Length() < 1)
+      THROW_AND_RETURN(isolate, "Wrong number of arguments");
 
-      return;
-    }
+    if(!args[0]->IsString())
+      THROW_AND_RETURN(isolate, "Expected the first argument to by of type string");
 
-    Local<String> utf8_string = String::NewFromUtf8(isolate, args[0]);
+    String::Utf8Value utf8_string(args[0]->ToString());
     Local<Boolean> ret;
 
     if(usb_driver::Unmount(*utf8_string)) {
@@ -62,21 +69,8 @@ namespace {
       ret = Boolean::New(isolate, false);
     }
 
-    return args.GetReturnValue().Set(ret);
+    args.GetReturnValue().Set(ret);
   }
-
-  //NAN_METHOD(Unmount)
-  //{
-  //Nan::HandleScope scope;
-
-  //String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
-  //if (usb_driver::Unmount(*utf8_string)) {
-  //info.GetReturnValue().Set(Nan::True());
-  //}
-  //else {
-  //info.GetReturnValue().Set(Nan::False());
-  //}
-  //}
 
   class NodeUSBWatcher : public usb_driver::USBWatcher {
     Persistent<Object> js_watcher;
@@ -123,59 +117,63 @@ namespace {
   };
 
 
-  NAN_METHOD(RegisterWatcher)
+  void RegisterWatcher(const FunctionCallbackInfo<Value> &args)
   {
-    Nan::HandleScope scope;
     Local<Object> js_watcher(Local<Object>::Cast(args[0]));
     NodeUSBWatcher *watcher = new NodeUSBWatcher(js_watcher);
+
     usb_driver::RegisterWatcher(watcher);
-    info.GetReturnValue().Set(Nan::Null());
+
+    // Return nothing
+    args.GetReturnValue.SetNull();
   }
 
-  NAN_METHOD(WaitForEvents)
+  void WaitForevents(const FunctionCallbackInfo<Value> &args)
   {
-    Nan::HandleScope scope;
-    usb_driver::WaitForEvents();
-    info.GetReturnValue().Set(Nan::Null());
+    usb_driveer::WaitForEvents();
+    // Return nothing
+    args.GetReturnValue().SetNull();
   }
 
-  NAN_METHOD(GetDevice)
+  void GetDevice(const FunctionCallbackInfo<Value> &args)
   {
-    Nan::HandleScope scope;
+    //Nan::HandleScope scope;
+    //String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
 
-    String::Utf8Value utf8_string(Local<String>::Cast(args[0]));
-    struct usb_driver::USBDrive *usb_drive =
-      usb_driver::GetDevice(*utf8_string);
-    if (usb_drive == NULL) {
-      info.GetReturnValue().Set(Nan::Null());
+    Local<String> str(Local<String>::Cast(args[0]));
+
+    auto usb_drive = usb_driver::GetDevice(*str);
+
+    if(usb_drive == NULL) {
+      args.GetReturnValue().SetNull();
+    } else {
+      args.GetReturnValue().Set(USBDrive_to_Object(usb_drive));
     }
-    else {
-      info.GetReturnValue().Set(USBDrive_to_Object(usb_drive));
-    }
   }
 
-  NAN_METHOD(GetDevices)
+  void GetDevices(const FunctionCallbackInfo<Value> &info)
   {
-    Nan::HandleScope scope;
+    //Nan::HandleScope scope;
+    auto devices = usb_driver::GetDevices();
 
-    std::vector<struct usb_driver::USBDrive *> devices =
-      usb_driver::GetDevices();
     Handle<Array> ary = Nan::New<Array>(devices.size());
-    for (unsigned int i = 0; i < devices.size(); i++) {
+
+    for(const auto device : devices) {
       ary->Set((int)i, USBDrive_to_Object(devices[i]));
     }
+
     info.GetReturnValue().Set(ary);
   }
 
   void
   Init(Handle<Object> exports)
   {
-    Nan::SetMethod(exports, "unmount", Unmount);
-    Nan::SetMethod(exports, "getDevice", GetDevice);
-    Nan::SetMethod(exports, "getDevices", GetDevices);
-    Nan::SetMethod(exports, "registerWatcher", RegisterWatcher);
-    Nan::SetMethod(exports, "waitForEvents", WaitForEvents);
+    NODE_SET_METHOD(exports, "unmount", Unmount);
+    NODE_SET_METHOD(exports, "getDevice", GetDevice);
+    NODE_SET_METHOD(exports, "getDevices", GetDevices);
+    NODE_SET_METHOD(exports, "registerWatcher", RegisterWatcher);
+    NODE_SET_METHOD(exports, "waitForEvents", WaitForEvents);
   }
 }  // namespace
 
-NODE_MODULE(usb_driver, Init)
+NODE_MODULE(usb_driver, node_bindings::Init)

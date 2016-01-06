@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace usb_driver {
-  struct USBDrive {
+  typedef struct USBDrive {
     std::string uid;
     std::string location_id;
     std::string product_id;
@@ -15,7 +15,7 @@ namespace usb_driver {
     std::string vendor_str;
     std::string mount;
     void *opaque;
-  };
+  } USBDrive;
 
   class USBWatcher {
   public:
@@ -26,8 +26,9 @@ namespace usb_driver {
     virtual void unmount(struct USBDrive *usb_info) = 0;
   };
 
-  std::vector<struct USBDrive *> GetDevices(void);
-  struct USBDrive *GetDevice(const std::string &device_id);
+  std::vector<USBDrive *> GetDevices(void);
+  USBDrive *GetDevice(const std::string &device_id);
+
   bool Unmount(const std::string &device_id);
   void RegisterWatcher(USBWatcher *watcher);
   void WaitForEvents(void);
