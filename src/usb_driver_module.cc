@@ -13,10 +13,10 @@ namespace {
         do {                                                \
             Local<String> _name = Nan::New<v8::String>(name).ToLocalChecked(); \
             if (val.size() > 0) {                           \
-                obj->Set(_name, Nan::New<v8::String>(val)).ToLocalChecked();   \
+                Nan::Set(obj, _name, Nan::New<v8::String>(val).ToLocalChecked()); \
             }                                               \
             else {                                          \
-                obj->Set(_name, Nan::Null());                 \
+                Nan::Set(obj, _name, Nan::Null());          \
             }                                               \
         }                                                   \
         while (0)
