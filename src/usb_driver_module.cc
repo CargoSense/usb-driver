@@ -7,7 +7,6 @@ namespace {
         const char* name,
         const std::string str)
     {
-      Nan::HandleScope scope;
       v8::Local<v8::String> _name = Nan::New(name).ToLocalChecked();
 
       if (str.size() > 0) {
@@ -20,7 +19,6 @@ namespace {
     static inline v8::Local<v8::Object> USBDrive_to_Object(
         usb_driver::USBDrive *usb_drive)
     {
-      Nan::HandleScope scope;
       v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
       setAttr(obj, "id", usb_drive->uid);
