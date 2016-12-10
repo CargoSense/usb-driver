@@ -7,6 +7,7 @@
 #import <IOKit/usb/IOUSBLib.h>
 #import <IOKit/storage/IOStorageDeviceCharacteristics.h>
 #import <DiskArbitration/DiskArbitration.h>
+#import <mach/mach.h>
 
 #include <map>
 
